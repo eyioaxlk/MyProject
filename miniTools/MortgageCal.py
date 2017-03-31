@@ -9,6 +9,62 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QMainWindow,
 from PyQt5.QtCore import QCoreApplication
 
 
+class ResultPrint(QWidget):
+
+    def __init__(self, rstr, rcount=0):
+        super().__init__()
+
+        self.rstr = rstr
+        self.rcount = rcount
+
+        self.initUI()
+
+    def initUI(self):
+
+        grid = QGridLayout()
+
+        if isinstance(self.rstr, list):
+
+            self.textbox = QTextEdit()
+            self.textbox.setReadOnly(True)
+
+            # for each_result in self.rstr:
+            self.textbox.setText(str(self.rstr))
+
+            grid.addWidget(self.textbox, 0, 0, 300, 300)
+            self.setLayout(grid)
+            self.setGeometry(300, 300, 300, 300)
+
+
+
+            """
+            grid.setSpacing(1)
+
+            for each_result, iii in zip(self.rstr, range(self.rcount)):
+                self.result = QLabel(each_result)
+                grid.addWidget(self.result, iii+1, 0)
+
+            self.setLayout(grid)
+            self.setGeometry(300, 300, 300, 300)
+            """
+
+
+        else:
+            grid.setSpacing(5)
+
+            self.result = QLabel('每月还款金额为 %.2f 元' % self.rstr)
+            grid.addWidget(self.result, 1, 0)
+            self.setLayout(grid)
+
+
+            self.setGeometry(300, 300, 100, 100)
+
+        self.setWindowTitle('计算结果')
+
+
+
+
+
 class MortgageCal(QWidget):
 
     def __init__(self):
@@ -70,6 +126,8 @@ class MortgageCal(QWidget):
 
         self.EnterButton.clicked.connect(self.loanCal)
 
+        # self.resultprint = ResultPrint()
+
 
         self.setGeometry(300, 300, 400, 300)
         self.setWindowTitle('房贷计算器')
@@ -84,25 +142,28 @@ class MortgageCal(QWidget):
         gjjdk = float(self.ProvidentFund.text())
         gjjll = float(self.ProvidentFundRate.text())/1200
 
+
         if self.LoanType.currentIndex() == 0:
 
             syhk = sydk*yll*pow((1+yll), 12*years)/(pow((1+yll), 12*years)-1)
             gjjhk = gjjdk*gjjll*pow((1+gjjll), 12*years)/(pow((1+gjjll), 12*years)-1)
 
             yhk = syhk + gjjhk
-            print("每月还款金额为 %.2f" % yhk)
+            self.resultprint = ResultPrint(yhk)
+            self.resultprint.show()
+            # print("每月还款金额为 %.2f" % yhk)
+
 
         else:
+
+            result = []
             for i in range(12*years):
                 yhk = round(sydk/(12*years)+(sydk-(sydk/(12*years))*i)*yll+
                 gjjdk/(12*years)+(gjjdk-(gjjdk/(12*years))*i)*gjjll, 2)
-                print("第 %d 个月需还款 %.2f" % (i, yhk))
+                result.append("第 %d 个月需还款 %.2f 元 \n" % (i, yhk))
 
-
-
-
-
-
+            self.resultprint = ResultPrint(result, 12*years)
+            self.resultprint.show()
 
 
 if __name__ == '__main__':
